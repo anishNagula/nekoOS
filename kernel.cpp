@@ -78,11 +78,36 @@ void print_line(const char* msg, volatile char* vga, int* cursor, bool is_title)
     move_cursor(*cursor);
 }
 
+// Simple delay loop (tune the count to adjust speed)
+void delay(int count) {
+    for (volatile int i = 0; i < count; i++) {
+        // Do nothing, just burn time
+        asm volatile("nop");
+    }
+}
+
+// Print a full line with typewriter effect
+void print_line_typewriter(const char* msg, volatile char* vga, int* cursor, bool is_title) {
+    for (int i = 0; msg[i] != '\0'; ++i) {
+        if (*cursor >= SCREEN_SIZE) scroll(vga, cursor);
+        write_vga_char(vga, *cursor, msg[i], is_title);
+        *cursor += 2;
+        move_cursor(*cursor);
+
+        delay(10000000);  // Adjust delay count here for speed (higher = slower)
+    }
+
+    *cursor = ((*cursor / (VGA_WIDTH * CHAR_WIDTH)) + 1) * (VGA_WIDTH * CHAR_WIDTH);
+    move_cursor(*cursor);
+}
+
 // === Keyboard event handler ===
 void handle_scancode(u8 scancode, volatile char* vga, int* cursor) {
     if (scancode & 0x80) return; // Ignore key release
 
     if (scancode == 0x01) {
+        // Move cursor to the next line start
+        *cursor = ((*cursor / (VGA_WIDTH * CHAR_WIDTH)) + 1) * (VGA_WIDTH * CHAR_WIDTH);
         print_line("ESC pressed. Stopping input.", vga, cursor, false);
         while (1) asm volatile("hlt");
     }
@@ -111,7 +136,7 @@ extern "C" void main() {
     volatile char* vga = (char*)0xB8000;
     int cursor = 0;
 
-    print_line("Welcome to NekoOS!", vga, &cursor, true);
+    print_line_typewriter("Welcome to NekoOS!", vga, &cursor, true);
 
     while (true) {
         while (!KB_DATA_READY) {}
