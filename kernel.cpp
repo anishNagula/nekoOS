@@ -3,6 +3,7 @@
 #define CHAR_WIDTH 2
 #define SCREEN_SIZE (VGA_WIDTH * VGA_HEIGHT * CHAR_WIDTH)
 #define WHITE_ON_BLACK 0x0F
+#define TITLE_COLOR 0x0A
 
 // reading from port
 unsigned char inb(unsigned short port) {
@@ -36,9 +37,9 @@ void move_cursor(int cursor) {
     outb(0x3D5, (unsigned char)((pos >> 8) & 0xFF));
 }
 
-void write_vga_char(volatile char* vga, int cursor, char c) {
+void write_vga_char(volatile char* vga, int cursor, char c, bool is_title) {
     vga[cursor] = c;
-    vga[cursor + 1] = WHITE_ON_BLACK;
+    vga[cursor + 1] = is_title ? TITLE_COLOR : WHITE_ON_BLACK;
 }
 
 void scroll(volatile char* vga, int* cursor) {
@@ -56,16 +57,10 @@ void scroll(volatile char* vga, int* cursor) {
     *cursor -= VGA_WIDTH * CHAR_WIDTH;
 }
 
-void scroll_if_needed(volatile char* vga, int* cursor) {
-    if (*cursor >= SCREEN_SIZE) {
-        scroll(vga, cursor);
-    }
-}
-
-void print_line(const char* msg, volatile char* vga, int* cursor) {
+void print_line(const char* msg, volatile char* vga, int* cursor, bool is_title) {
 
     for (int i = 0; msg[i] != '\0'; ++i) {
-        write_vga_char(vga, *cursor, msg[i]);
+        write_vga_char(vga, *cursor, msg[i], is_title);
         *cursor += 2;
     }
 
@@ -77,7 +72,7 @@ extern "C" void main() {
     volatile char* vga = (char*)0xB8000;
     int cursor = 0;
 
-    print_line("Welcome to NekoOS!", vga, &cursor);
+    print_line("Welcome to NekoOS!", vga, &cursor, true);
 
     while (true) {
         // wait for key press
@@ -87,14 +82,14 @@ extern "C" void main() {
 
         // ESC to exit
         if (scancode == 0x01) {
-            print_line("ESC pressed. Stopping input.", vga, &cursor);
+            print_line("ESC pressed. Stopping input.", vga, &cursor, false);
             break;
         }
 
         // backspace
         else if (scancode == 0x0E && cursor >= 2) {
             cursor -= 2;
-            write_vga_char(vga, cursor, ' ');
+            write_vga_char(vga, cursor, ' ', false);
             move_cursor(cursor);
             continue;
         }
@@ -102,7 +97,6 @@ extern "C" void main() {
         // enter key
         else if (scancode == 0x1C) {
             cursor = ((cursor / (VGA_WIDTH * CHAR_WIDTH)) + 1) * VGA_WIDTH * CHAR_WIDTH;
-            scroll_if_needed(vga, &cursor);
             move_cursor(cursor);
             continue;
         }
@@ -110,9 +104,8 @@ extern "C" void main() {
         char ch = scancode_to_ascii(scancode);
         if (ch == '?') continue;
 
-        write_vga_char(vga, cursor, ch);
+        write_vga_char(vga, cursor, ch, false);
         cursor += 2;
-        scroll_if_needed(vga, &cursor);
         move_cursor(cursor);
     }
 
