@@ -11,7 +11,7 @@ mov sp, bp
 
 mov bx, KERNEL_LOCATION
 mov ah, 0x02          ; Read sectors
-mov al, 2             ; Number of sectors to read
+mov al, 20            ; Number of sectors to read
 mov ch, 0x00          ; Cylinder 0
 mov dh, 0x00          ; Head 0
 mov cl, 0x02          ; Sector 2 (after boot sector)
@@ -76,7 +76,10 @@ start_protected_mode:
     mov ebp, 0x90000
     mov esp, ebp
 
-    jmp KERNEL_LOCATION
+
+    jmp CODE_SEG:0x1000
+
+jump_message: db "Loading Kernel..."
 
 times 510-($-$$) db 0
 dw 0xAA55

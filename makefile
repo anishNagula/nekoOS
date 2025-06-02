@@ -1,4 +1,4 @@
-# Define tools and flags
+# Tools and flags
 CC = i686-elf-gcc
 LD = i686-elf-ld
 NASM = nasm
@@ -7,51 +7,41 @@ LDFLAGS = -Ttext 0x1000 --oformat binary
 QEMU = qemu-system-x86_64
 
 # File targets
-KERNEL_C = kernel.cpp
-KERNEL_OBJ = kernel.o
-ENTRY_ASM = kernel_entry.asm
-ENTRY_OBJ = kernel_entry.o
-KEYBOARD_ASM = keyboard.asm
-KEYBOARD_OBJ = keyboard.o
-KERNEL_BIN = full_kernel.bin
-BOOTLOADER_ASM = bootloader.asm
-BOOTLOADER_BIN = bootloader.bin
-ZEROES_ASM = zeroes.asm
-ZEROES_BIN = zeroes.bin
-EVERYTHING_BIN = everything.bin
-OS_BIN = OS.bin
+SRC_DIR = .
+BUILD_DIR = build
+
+KERNEL_SRC = $(SRC_DIR)/kernel.cpp
+ENTRY_SRC = $(SRC_DIR)/kernel_entry.asm
+BOOTLOADER_SRC = $(SRC_DIR)/bootloader.asm
+
+KERNEL_OBJ = $(BUILD_DIR)/kernel.o
+ENTRY_OBJ = $(BUILD_DIR)/kernel_entry.o
+KERNEL_BIN = $(BUILD_DIR)/kernel.bin
+BOOTLOADER_BIN = $(BUILD_DIR)/bootloader.bin
+OS_BIN = $(BUILD_DIR)/os-image.bin
 
 all: $(OS_BIN)
 	@echo "Build complete. Run with: make run"
 
-$(KERNEL_OBJ): $(KERNEL_C)
+$(KERNEL_OBJ): $(KERNEL_SRC)
 	$(CC) $(CFLAGS) $< -o $@
 
-$(ENTRY_OBJ): $(ENTRY_ASM)
+$(ENTRY_OBJ): $(ENTRY_SRC)
 	$(NASM) $< -f elf -o $@
 
-$(KEYBOARD_OBJ): $(KEYBOARD_ASM)
-	$(NASM) $< -f elf -o $@
+$(KERNEL_BIN): $(ENTRY_OBJ) $(KERNEL_OBJ)
+	$(LD) $(LDFLAGS) -o $@ $(ENTRY_OBJ) $(KERNEL_OBJ)
 
-$(KERNEL_BIN): $(ENTRY_OBJ) $(KERNEL_OBJ) $(KEYBOARD_OBJ)
-	$(LD) $(LDFLAGS) -o $@ $(ENTRY_OBJ) $(KERNEL_OBJ) $(KEYBOARD_OBJ)
-
-$(BOOTLOADER_BIN): $(BOOTLOADER_ASM)
+$(BOOTLOADER_BIN): $(BOOTLOADER_SRC)
 	$(NASM) $< -f bin -o $@
 
-$(ZEROES_BIN): $(ZEROES_ASM)
-	$(NASM) $< -f bin -o $@
-
-$(EVERYTHING_BIN): $(BOOTLOADER_BIN) $(KERNEL_BIN)
-	cat $(BOOTLOADER_BIN) $(KERNEL_BIN) > $@
-
-$(OS_BIN): $(EVERYTHING_BIN) $(ZEROES_BIN)
-	cat $(EVERYTHING_BIN) $(ZEROES_BIN) > $@
+$(OS_BIN): $(BOOTLOADER_BIN) $(KERNEL_BIN)
+	cat $^ > $@
 
 run: $(OS_BIN)
-	$(QEMU) -drive format=raw,file=$(OS_BIN)
+	$(QEMU) -drive format=raw,file=$<
 
 clean:
-	rm -f *.o *.bin
+	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.bin
 
 .PHONY: all run clean
