@@ -4,7 +4,7 @@ KERNEL_LOCATION equ 0x1000
 
 mov [BOOT_DISK], dl        ; Save boot disk number
 
-; Print "Loading Kernel..." message before loading kernel
+; printing "Loading Kernel..." message before loading kernel
 mov si, jump_message
 .print_char_msg:
     lodsb
@@ -15,7 +15,7 @@ mov si, jump_message
     jmp .print_char_msg
 .done_print:
 
-; Delay loop to keep message visible for a while
+; intentional delay loop
 mov cx, 0xFFFF
 .delay_outer:
     push cx
@@ -41,7 +41,6 @@ mov dl, [BOOT_DISK]
 int 0x13
 jc disk_error             ; Jump if carry flag set (error)
 
-; Set text mode 80x25 color text
 mov ah, 0x00
 mov al, 0x03
 int 0x10
