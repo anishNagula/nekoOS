@@ -145,7 +145,7 @@ void parse_and_execute(char* input_buffer, volatile char* vga, int* cursor) {
         input_buffer[start + 3] == 'p') {
         *cursor = ((*cursor / (VGA_WIDTH * CHAR_WIDTH)) + 1) * (VGA_WIDTH * CHAR_WIDTH);
         move_cursor(*cursor);
-        print_line("Available commands: help, clear, echo, reboot", vga, cursor, false);
+        print_line("Available commands: help, clear, echo, reboot, exit", vga, cursor, false);
         return;
     }
 
@@ -253,9 +253,6 @@ void handle_scancode(u8 scancode, volatile char* vga, int* cursor) {
         write_vga_char(vga, *cursor, '>', false);
         *cursor+=2;
         move_cursor(*cursor);
-        write_vga_char(vga, *cursor, ' ', false);
-        *cursor+=2;
-        move_cursor(*cursor);
     }
     else {       // all other keys
         char ch = scancode_to_ascii(scancode);
@@ -278,9 +275,6 @@ extern "C" void main() {
     print_line_typewriter("Welcome to NekoOS", vga, &cursor, true);
 
     write_vga_char(vga, cursor, '>', false);
-    cursor+=2;
-    move_cursor(cursor);
-    write_vga_char(vga, cursor, ' ', false);
     cursor+=2;
     move_cursor(cursor);
 
