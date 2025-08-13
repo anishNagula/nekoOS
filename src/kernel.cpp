@@ -2,7 +2,7 @@
 #include "keyboard.h"
 #include "command.h"
 
-// === kernel main ===
+
 extern "C" void main() {
     volatile char* vga = (char*)0xB8000;
     int cursor = 0;

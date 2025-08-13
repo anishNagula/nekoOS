@@ -16,7 +16,7 @@ typedef struct {
 } command_t;
 
 
-// === Command Handlers ===
+// command handeling func's
 void cmd_help(volatile char* vga, int* cursor, char* args) {
     *cursor = ((*cursor / (VGA_WIDTH * CHAR_WIDTH)) + 1) * (VGA_WIDTH * CHAR_WIDTH);
     move_cursor(*cursor);
@@ -50,7 +50,6 @@ void cmd_echo(volatile char* vga, int* cursor, char* args) {
 }
 
 
-// === Command List ===
 command_t commands[] = {
     {"help", 4, cmd_help},
     {"clear", 5, cmd_clear},
@@ -62,7 +61,7 @@ command_t commands[] = {
 int num_commands = sizeof(commands) / sizeof(command_t);
 
 
-// === Main parse and execute function ===
+// parser
 void parse_and_execute(char* input_buffer, volatile char* vga, int* cursor) {
     int start = 0;
     int length = 0;
@@ -96,14 +95,13 @@ void parse_and_execute(char* input_buffer, volatile char* vga, int* cursor) {
         }
     }
 
-    // for unknown command
+    // unknown command
     *cursor = ((*cursor / (VGA_WIDTH * CHAR_WIDTH)) + 1) * (VGA_WIDTH * CHAR_WIDTH);
     move_cursor(*cursor);
     print_line("Unknown command", vga, cursor, false);
 }
 
 
-// === shutdown ===
 void shutdown(volatile char* vga, int* cursor) {
     print_line_typewriter("Shutting down...", vga, cursor, true);
 

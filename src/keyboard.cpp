@@ -7,7 +7,7 @@ char input_buffer[MAX_INPUT];
 int  input_buffer_index = 0;
 bool shift_pressed = false;
 
-// === scancode to ASCII converter ===
+// scancode to ascii convert func
 char scancode_to_ascii(u8 scancode) {
     static const char normal_map[0x54] = {
         0,    0,    '1',  '2',  '3',  '4',  '5',  '6',
@@ -41,7 +41,7 @@ char scancode_to_ascii(u8 scancode) {
     return shift_pressed ? shift_map[scancode] : normal_map[scancode];
 }
 
-// === handeling key presses ===
+// handle key press
 void handle_scancode(u8 scancode, volatile char* vga, int* cursor) {
     if (scancode & 0x80) {
         u8 released = scancode & 0x7F;
@@ -51,7 +51,7 @@ void handle_scancode(u8 scancode, volatile char* vga, int* cursor) {
         return;
     }
 
-    // detecting shift
+    // if shift
     if (scancode == 0x2A || scancode == 0x36) {
         shift_pressed = true;
         return;
@@ -82,7 +82,7 @@ void handle_scancode(u8 scancode, volatile char* vga, int* cursor) {
         *cursor += 2;
         move_cursor(*cursor);
     }
-    else {       // all other
+    else {       // any other key
         char ch = scancode_to_ascii(scancode);
         if (ch) {
             if (*cursor >= SCREEN_SIZE) scroll(vga, cursor);

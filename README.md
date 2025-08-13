@@ -6,12 +6,12 @@
 
 ## Features
 
-- 🧠 **Bootloader**: Custom bootloader in x86 Assembly that loads the kernel into memory.
-- 🛡 **Protected Mode**: Transition from real mode to 32-bit protected mode using GDT.
-- ⌨️ **Keyboard Input**: Raw scancode reading and ASCII translation.
-- 📺 **VGA Text Output**: Direct writing to memory-mapped VGA buffer (0xB8000).
-- ⛔ **ESC Detection**: Exits input loop gracefully on pressing the ESC key.
-- 🕹 **Backspace Handling**: Simple backspace implementation that clears characters.
+- **Bootloader**: Custom bootloader in x86 Assembly that loads the kernel into memory.
+- **Protected Mode**: Transition from real mode to 32-bit protected mode using GDT.
+- **Keyboard Input**: Raw scancode reading and ASCII translation.
+- **VGA Text Output**: Direct writing to memory-mapped VGA buffer (0xB8000).
+- **ESC Detection**: Exits input loop gracefully on pressing the ESC key.
+- **Backspace Handling**: Simple backspace implementation that clears characters.
 
 ---
 
@@ -50,11 +50,16 @@ make run
 
 ```plaintext
 .
-├── bootloader.asm        # Custom bootloader (loads kernel)
-├── kernel.cpp            # Main kernel logic (keyboard input, VGA output)
-├── kernel_entry.asm      # Entry point in protected mode
-├── Makefile              # Build configuration
-├── zeroes.asm            # Padding to ensure 512-byte alignment
+├── src/
+│   ├── bootloader.asm
+│   ├── kernel.cpp
+│   ├── kernel_entry.asm
+|   ├── command.cpp
+|   ├── vga.cpp
+|   ├── io.cpp
+|   ├── keyboard.cpp
+|   └── utils.cpp
+├── Makefile
 └── README.md
 ```
 
@@ -76,6 +81,7 @@ This project aims to:
 - Explore memory-mapped I/O and direct hardware access.
 - Write a basic text UI without relying on external libraries.
 - Lay the foundation for adding features like:
+  - PIT
   - Paging / memory management
   - File system support
   - System calls

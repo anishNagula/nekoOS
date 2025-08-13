@@ -2,9 +2,9 @@
 
 KERNEL_LOCATION equ 0x1000
 
-mov [BOOT_DISK], dl        ; Save boot disk number
+mov [BOOT_DISK], dl        ; save the boot disk number
 
-; printing "Loading Kernel..." message before loading kernel
+
 mov si, jump_message
 .print_char_msg:
     lodsb
@@ -15,7 +15,7 @@ mov si, jump_message
     jmp .print_char_msg
 .done_print:
 
-; intentional delay loop
+; forced loop
 mov cx, 0xFFFF
 .delay_outer:
     push cx
@@ -26,20 +26,20 @@ mov cx, 0xFFFF
 loop .delay_outer
 
 xor ax, ax
-mov es, ax                ; ES=0 for int 0x13 buffer segment
+mov es, ax                
 mov ds, ax
 mov bp, 0x8000
 mov sp, bp
 
 mov bx, KERNEL_LOCATION
-mov ah, 0x02              ; BIOS read sectors function
-mov al, 20                ; Number of sectors to read (32)
-mov ch, 0x00              ; Cylinder 0
-mov dh, 0x00              ; Head 0
-mov cl, 0x02              ; Sector 2 (after boot sector)
+mov ah, 0x02              ; BIOS func to read sectors
+mov al, 20                ; no.of sectors to read [32]
+mov ch, 0x00              ; cylinder 0
+mov dh, 0x00              ; head 0
+mov cl, 0x02              ; sector2
 mov dl, [BOOT_DISK]
 int 0x13
-jc disk_error             ; Jump if carry flag set (error)
+jc disk_error             ; jump if error (settig carry flag)
 
 mov ah, 0x00
 mov al, 0x03
@@ -52,18 +52,18 @@ cli
 lgdt [GDT_descriptor]
 
 mov eax, cr0
-or eax, 1                ; Set PE bit to enter protected mode
+or eax, 1                ; entering protected mode
 mov cr0, eax
 
 jmp CODE_SEG:start_protected_mode
 
-jmp $                    ; Infinite loop if something goes wrong
+jmp $                    ; loop on error
 
-; === Disk error handler ===
+; code to handle disk error
 disk_error:
-    mov bl, ah           ; BIOS error code in BL
-
+    mov bl, ah
     mov si, disk_error_msg
+
 .print_char:
     lodsb
     cmp al, 0
@@ -73,17 +73,15 @@ disk_error:
     jmp .print_char
 
 .print_code:
-    ; Print high nibble of BL
     mov al, bl
     shr al, 4
     call print_hex_nibble
 
-    ; Print low nibble of BL
     mov al, bl
     and al, 0x0F
     call print_hex_nibble
 
-    jmp $                ; Halt here forever
+    jmp $                ; halt infinightly
 
 print_hex_nibble:
     cmp al, 9
@@ -97,7 +95,7 @@ print_hex_nibble:
     int 0x10
     ret
 
-; === GDT ===
+; GDT
 BOOT_DISK: db 0
 
 GDT_start:
@@ -127,7 +125,8 @@ GDT_descriptor:
     dw GDT_end - GDT_start - 1
     dd GDT_start
 
-; === Protected mode start ===
+
+; protected mode code
 [bits 32]
 start_protected_mode:
     mov ax, DATA_SEG
@@ -140,7 +139,7 @@ start_protected_mode:
     mov ebp, 0x90000
     mov esp, ebp
 
-    jmp CODE_SEG:0x1000     ; Jump to kernel start
+    jmp CODE_SEG:0x1000     ; jump to kernel start
 
 jump_message: db "Loading Kernel...", 0
 
