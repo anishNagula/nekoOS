@@ -1,16 +1,16 @@
 # NekoOS
 
-**NekoOS** is a minimalist 32-bit operating system built from scratch using C and Assembly for the x86 architecture. It includes a custom bootloader, kernel with direct VGA text-mode output, and low-level keyboard input via scancodes. The project serves as an educational introduction to operating system fundamentals, protected mode, and bare-metal programming.
+**NekoOS** is a minimal 32-bit operating system built using C and Assembly for the x86 architecture. It includes a custom bootloader, kernel with direct VGA text-mode output, and keyboard input via scancodes.
 
 ---
 
 ## Features
 
-- **Bootloader**: Custom bootloader in x86 Assembly that loads the kernel into memory.
+- **Bootloader**: Bootloader in x86 Assembly that loads the custom kernel into memory.
 - **Protected Mode**: Transition from real mode to 32-bit protected mode using GDT.
 - **Keyboard Input**: Raw scancode reading and ASCII translation.
-- **VGA Text Output**: Direct writing to memory-mapped VGA buffer (0xB8000).
-- **ESC Detection**: Exits input loop gracefully on pressing the ESC key.
+- **VGA Text Output**: Direct writing to memory mapped VGA buffer (0xB8000).
+- **ESC Detection**: Exits input loop on pressing the ESC key.
 - **Backspace Handling**: Simple backspace implementation that clears characters.
 
 ---
@@ -74,28 +74,22 @@ make run
 
 ---
 
-## Goals
-
-This project aims to:
-- Understand how real and protected mode differ.
-- Explore memory-mapped I/O and direct hardware access.
-- Write a basic text UI without relying on external libraries.
-- Lay the foundation for adding features like:
-  - PIT
-  - Paging / memory management
-  - File system support
-  - System calls
-  - Shell interface
+## Future workd
+- PIT
+- Paging / memory management
+- File system support
+- System calls
+- Shell interface
 
 ---
 
 ## License
 
-MIT License – use, modify, and learn freely!
+MIT License
 
 ---
 
 ## Credits
 
-- Inspired by the [OSDev.org](https://wiki.osdev.org/) community and tutorials.
+- References to [OSDev.org](https://wiki.osdev.org/) community and tutorials.
 - Named "NekoOS" after the Japanese word for cat (猫), symbolizing curiosity and lightness.
